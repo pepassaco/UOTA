@@ -9,7 +9,8 @@ Lector de QSLs electrónicas por medio de las APIs de eQSL y LoTW para su pospro
 Actualizado por última vez: 06-09-2022
 '''
 
-import urllib.request, sys, argparse
+import urllib.request, sys, argparse, os
+import adif_io
 
 
 
@@ -18,13 +19,20 @@ class APIFran():
 
 	def getArrayIndicativosUnis(self):
 		# Devuelve base de datos con los indicativos de las universidades que participan en el diploma
-		return(["EA4RCT", "OZ7ORM", "HB9ZZ"])
+		return(["EA4RCT", "OZ7ORM", "HB9ZZ", "EB4ADC"])
 
 	def getHistoricoQSLs(self, indicativo):
-		return("aqui vendrian los QSOs en JSON")
+		# Devuelve todos las QSLs con universidades ya contabilizadas en un pasado para comparar y no contar repetidas
+		QSL1 = {'CALL': 'EB4ADC', 'BAND': '2M', 'BAND_RX': '70CM', 'MODE': 'FM', 'APP_LOTW_MODEGROUP': 'PHONE', 'QSO_DATE': '20210903', 'APP_LOTW_RXQSO': '2021-09-03 22:10:09', 'TIME_ON': '173000', 'APP_LOTW_QSO_TIMESTAMP': '2021-09-03T17:30:00Z', 'PROP_MODE': 'SAT', 'SAT_NAME': 'SO-50', 'QSL_RCVD': 'Y', 'QSLRDATE': '20210911', 'APP_LOTW_RXQSL': '2021-09-11 22:49:11'}
+		QSL2 = {'CALL': 'EB4ADC', 'BAND': '2M', 'BAND_RX': '70CM', 'MODE': 'FM', 'APP_LOTW_MODEGROUP': 'PHONE', 'QSO_DATE': '20210801', 'APP_LOTW_RXQSO': '2021-08-01 22:19:05', 'TIME_ON': '202400', 'APP_LOTW_QSO_TIMESTAMP': '2021-08-01T20:24:00Z', 'PROP_MODE': 'SAT', 'SAT_NAME': 'SO-50', 'QSL_RCVD': 'Y', 'QSLRDATE': '20210807', 'APP_LOTW_RXQSL': '2021-08-07 16:45:03'}
+		historicoQSLs = [QSL2, QSL1]
+		return(historicoQSLs)
 
 	def postNuevasQSLs(self, indicativo, QSLs):
 		#le mando a la api un stron con los json de los nuevos contactos
+		for qsl in QSLs:
+			print(qsl)
+			print("\n")
 		return
 
 	def getDatosDiploma(self, indicativo, categoría, color):
@@ -79,7 +87,7 @@ class obtenADIF():
 			print("Error al obtener los datos de eQSL. Revise las credenciales y/o fechas introducidas")
 			return
 
-		print("ADIF obtenido en eQSL :)")
+		print("ADIF obtenido en eQSL :)\n")
 
 
 	def getADIFLoTW(self, indicativo, contraseñaLoTW, año = None):
@@ -106,70 +114,70 @@ class obtenADIF():
 		if cabecera == "<!DOCTYPE HTML":
 			print("Error al obtener los datos de eQSL. Revise las credenciales y/o fechas introducidas")
 		else:
-			print("ADIF obtenido en LoTW :)")
+			print("ADIF obtenido en LoTW :)\n")
 
 
 
 
 
 
-class ADIF2JSON():
+class ADIF2dict():
 
 	def __init__(self):
 		self.rutaADIF = "./adiTemp.adi"
-		self.rutaJSON = "./adiTemp.json"
 
 	def conversor(self):
-		print("TODO")
+		[qsos_raw, adif_header] = adif_io.read_from_file(self.rutaADIF)
+		return(qsos_raw)
+
+	def limpiador(self):
+		os.remove(self.rutaADIF)
 
 
 
-'''
 
-class procesaJSON():
 
-	def __init__(self):
-		self.rutaJSON = "./adiTemp.json"
+class procesaDict():
 
-	def abreJSON(self):
-		return("JSON")
+	def __init__(self, d, i):
+		self.QSLsSubidas = d
+		self.indicativo = i
 
 	def comparador(self):
 
 		miAPI = APIFran()
+		uniCalls = miAPI.getArrayIndicativosUnis()
+		uniQSLs = []
 
-		subidasQSLs = self.abreJSON();
+		for qsl in self.QSLsSubidas:
 
-		uniQSLs = None
+  			if qsl["CALL"] in uniCalls:
+  				if "QSO_DATE" in qsl and "MODE" in qsl and "BAND" in qsl:
+  					uniQSLs.append(qsl)
 
-		for #buscamos en miAPI.getArrayIndicativosUnis()
+		antiguosQSLs = miAPI.getHistoricoQSLs(self.indicativo)
+		fechas = []
+		modos = []
+		bandas = []
 
-			uniQSLs = #loqsea
-
-		antiguosQSLs = miAPI.getHistoricoQSLs()
-
-
-		nuevosQSLs = None
-
-		for qso in uniQSLs #comparamos con antiguos
-
-			nuevosQSLs = 
-
-		miAPI.postNuevasQSLs(nuevosQSLs)
-
-'''
+		for qsl in antiguosQSLs:
+			fechas.append(qsl["QSO_DATE"])
+			modos.append(qsl["MODE"])
+			bandas.append(qsl["BAND"])
 
 
-'''
-class actualizaTablasYDiplomas():
 
-	Una vez que se subieron los nuevos QSLs, se debe comparar si el usuario obtuvo un diploma 
-	(en cuyo caso se avisaría con una notificación y se actualizaría el número de diplomas concedidos
-	en esa categoría) y se actualiza la tabla de puntuaciones
+		for i in range(len(antiguosQSLs)):
+			qsl = antiguosQSLs[i]
 
-'''
+			for qslU in uniQSLs:
+				if qslU["QSO_DATE"] in fechas:
+					if(qslU["MODE"] == modos[i] and qslU["BAND"] == bandas[i]):
+						uniQSLs.remove(qslU)
 
 
+
+		miAPI.postNuevasQSLs(self.indicativo, uniQSLs)
 
 
 
@@ -191,9 +199,13 @@ def main():
     else:
     	oa.getADIFLoTW(args.i, args.c, args.fecha)
 
-    a2j = ADIF2JSON()
+    a2j = ADIF2dict()
+    dictQSO = a2j.conversor()
+    #a2j.limpiador()
 
-    #pj = procesaJSON()
+    pj = procesaDict(dictQSO, args.i)
+
+    pj.comparador()
 
     
 
