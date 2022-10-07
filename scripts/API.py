@@ -13,7 +13,7 @@ class APIFran():
         return(historicoQSLs)
 
     def postNuevasQSLs(self, indicativo, QSLs):
-        #le mando a la api un stron con los json de los nuevos contactos
+        #le mando a la api un array de QSLs (en formato de diccionarios) de los nuevos contactos
         for qsl in QSLs:
             print(qsl)
             print("\n")
