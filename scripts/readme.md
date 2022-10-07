@@ -1,6 +1,10 @@
 ## qso_dump
 
-#### Uso: 
+#### About: 
+
+Calls wither the eQSL or LoTW APIs, retrieves the QSL logs, selects the entries in which the QSO CALLSIGN corresponds to an university taking place in the UOTA, checks whether it is a new entry that was not alredy in the database and, if it is, it is sent to the UOTA API.
+
+#### Usage: 
 
 eQSL:
 
@@ -14,15 +18,46 @@ LoTW:
 python3 qso_dump.py -i CALLSIGN -c PASSWORD -qsl 1 (optional: --fecha YYYY)
 ```
 
+
+
+
+
+
+
+
 ## checkAward.py
+
+#### About: 
+
+For an specified callsign, retrieves the log with universities in the UOTA program from the UOTA API, checks one by one whether the conditions to get any award are fullfilled and, sends to the API a boolean array with the awards that have been obtained.
+
+#### Usage: 
+
+```
+python3 checkAward.py -i CALLSIGN
+```
+
+
+
 
 
 
 
 ## generaAward
 
+#### About: 
 
-### assets folder structure
+Given the promary key of an awarded award and a callsign, accesses the UOTA API to retrieve the detais of such award and generates the corresponding PDF file.
+
+#### Usage: 
+```
+python3 generaAward.py -i CALLSIGN -d AWARD_NUMBER
+```
+
+AWARD_NUMBER is intended to be the primary key (an ID integer) of the specific entry in the database corresponding to the award to be generated.
+
+
+## Assets folder structure
 
 .
 └── assets/
