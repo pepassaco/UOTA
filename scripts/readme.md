@@ -59,6 +59,7 @@ AWARD_NUMBER is intended to be the primary key (an ID integer) of the specific e
 
 ## Assets folder structure
 
+```
 .
 └── assets/
     ├── permanent_awards/
@@ -90,6 +91,6 @@ AWARD_NUMBER is intended to be the primary key (an ID integer) of the specific e
         │   └── ...
         └── ...
 
-
+```
 
 
